@@ -1,0 +1,123 @@
+services:
+  # --------------------------
+  # API principal
+  # --------------------------
+  api_biblioteca:
+    build:
+      context: ./api_biblioteca
+    container_name: api_biblioteca
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api_biblioteca:/app
+    env_file:
+      - .env
+    command: sh -c "uvicorn app.main:app --host 0.0.0.0 --reload"
+    depends_on:
+      - biblioteca_db
+      - biblioteca_db_test
+      - broker
+      - images_service
+
+  # -------------------------
+  # Worker Celery
+  # -------------------------
+  celery_worker:
+    build:
+      context: ./api_biblioteca
+    container_name: celery_worker
+    command: celery -A app.services.celery.celery_app worker --loglevel=info
+    depends_on:
+      - broker
+      - biblioteca_db
+    env_file:
+      - .env
+
+  # -------------------------
+  # Scheduler Celery
+  # -------------------------
+  celery_beat:
+    build:
+      context: ./api_biblioteca
+    container_name: celery_beat
+    command: celery -A app.services.celery.celery_app beat --loglevel=info
+    depends_on:
+      - broker
+      - biblioteca_db
+    env_file:
+      - .env
+
+  # -------------------------
+  # Serviço de Imagens
+  # -------------------------
+  images_service:
+    build:
+      context: ./images_service
+    container_name: images_service
+    ports:
+      - "8001:8000"  # expõe externamente na porta 8001
+    env_file:
+      - .env
+    command: sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./upload:/app/upload
+
+  # -------------------------
+  # Redis (broker do Celery)
+  # -------------------------
+  broker:
+    image: redis:6.2-alpine
+    container_name: broker
+    ports:
+      - "6379:6379"
+
+  # -------------------------
+  # Banco de dados principal
+  # -------------------------
+  biblioteca_db:
+    image: postgres
+    container_name: biblioteca_db
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=biblioteca_db
+    volumes:
+      - biblioteca_db_data:/var/lib/postgresql/data
+
+  # -------------------------
+  # Banco de dados para testes
+  # -------------------------
+  biblioteca_db_test:
+    image: postgres
+    container_name: biblioteca_db_test
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://dev_gabriel:university@biblioteca_db_test:5432/biblioteca_db_test
+      - POSTGRES_DB=biblioteca_db_test
+    volumes:
+      - biblioteca_db_test_data:/var/lib/postgresql/data
+
+  # -------------------------
+  # PGAdmin (opcional)
+  # -------------------------
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    ports:
+      - "5050:80"
+    env_file:
+      - .env
+    depends_on:
+      - biblioteca_db
+
+# -------------------------
+# Volumes
+# -------------------------
+volumes:
+  biblioteca_db_data:
+  biblioteca_db_test_data:
