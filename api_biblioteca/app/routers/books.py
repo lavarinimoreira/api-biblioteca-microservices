@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.book import Livro as LivroModel
-from app.schemas.book import LivroCreate, LivroRead, LivroUpdate
+from app.schemas.book import LivroCreate, LivroRead, LivroUpdate, LivroOut
 from app.database import get_db
 from app.services.security import get_current_user
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/livros", tags=["Livros"])
 
 
 # Listar livros com filtros por título, autor e gênero
-@router.get("/", response_model=List[LivroRead])
+@router.get("/", response_model=List[LivroOut])
 async def listar_livros(
     titulo: Optional[str] = Query(None, description="Filtrar por título do livro"),
     autor: Optional[str] = Query(None, description="Filtrar por autor"),
