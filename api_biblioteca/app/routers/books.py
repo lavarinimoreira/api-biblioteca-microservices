@@ -3,9 +3,10 @@ from fastapi import APIRouter, HTTPException, Depends, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func
 
 from app.models.book import Livro as LivroModel
-from app.schemas.book import LivroCreate, LivroRead, LivroUpdate, LivroOut
+from app.schemas.book import LivroCreate, LivroRead, LivroUpdate, LivroOut, LivroListResponse
 from app.database import get_db
 from app.services.security import get_current_user
 
@@ -13,7 +14,43 @@ router = APIRouter(prefix="/livros", tags=["Livros"])
 
 
 # Listar livros com filtros por título, autor e gênero
-@router.get("/", response_model=List[LivroOut])
+# @router.get("/", response_model=List[LivroOut])
+# async def listar_livros(
+#     titulo: Optional[str] = Query(None, description="Filtrar por título do livro"),
+#     autor: Optional[str] = Query(None, description="Filtrar por autor"),
+#     genero: Optional[str] = Query(None, description="Filtrar por gênero"),
+#     skip: int = Query(0, ge=0, description="Número de registros para pular (paginação)"),
+#     limit: int = Query(10, ge=1, le=100, description="Número máximo de livros por página"),
+#     db: AsyncSession = Depends(get_db),
+#     # current_user: dict = Depends(get_current_user)
+# ):
+#     query = select(LivroModel)
+
+#     if titulo:
+#         query = query.where(LivroModel.titulo.ilike(f"%{titulo}%"))  # Busca parcial (case insensitive)
+#     if autor:
+#         query = query.where(LivroModel.autor.ilike(f"%{autor}%"))
+#     if genero:
+#         query = query.where(LivroModel.genero.ilike(f"%{genero}%"))
+
+#     query = query.offset(skip).limit(limit)
+#     result = await db.execute(query)
+#     livros = result.scalars().all()
+
+#     return livros
+
+
+# Crie um novo schema para resposta da listagem:
+# Exemplo (no arquivo schemas.py):
+#
+# from pydantic import BaseModel
+# from typing import List
+#
+# class LivroListResponse(BaseModel):
+#     livros: List[LivroOut]
+#     total: int
+
+@router.get("/", response_model=LivroListResponse)
 async def listar_livros(
     titulo: Optional[str] = Query(None, description="Filtrar por título do livro"),
     autor: Optional[str] = Query(None, description="Filtrar por autor"),
@@ -21,25 +58,35 @@ async def listar_livros(
     skip: int = Query(0, ge=0, description="Número de registros para pular (paginação)"),
     limit: int = Query(10, ge=1, le=100, description="Número máximo de livros por página"),
     db: AsyncSession = Depends(get_db),
-    # current_user: dict = Depends(get_current_user)
 ):
-    query = select(LivroModel)
-
+    # Cria a query base sem paginação
+    base_query = select(LivroModel)
+    
     if titulo:
-        query = query.where(LivroModel.titulo.ilike(f"%{titulo}%"))  # Busca parcial (case insensitive)
+        base_query = base_query.where(LivroModel.titulo.ilike(f"%{titulo}%"))
     if autor:
-        query = query.where(LivroModel.autor.ilike(f"%{autor}%"))
+        base_query = base_query.where(LivroModel.autor.ilike(f"%{autor}%"))
     if genero:
-        query = query.where(LivroModel.genero.ilike(f"%{genero}%"))
+        base_query = base_query.where(LivroModel.genero.ilike(f"%{genero}%"))
 
-    query = query.offset(skip).limit(limit)
-    result = await db.execute(query)
+    # Executa a contagem total utilizando um subquery para garantir que offset/limit não interfiram
+    subquery = base_query.subquery()
+    count_query = select(func.count()).select_from(subquery)
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    # Aplica paginação na query original
+    paginated_query = base_query.offset(skip).limit(limit)
+    result = await db.execute(paginated_query)
     livros = result.scalars().all()
 
-    return livros
+    return {"livros": livros, "total": total}
+
+
+
 
 # Obter livro por ID
-@router.get("/{livro_id}", response_model=LivroRead)
+@router.get("/{livro_id}", response_model=LivroOut)
 async def obter_livro(
     livro_id: int,
     db: AsyncSession = Depends(get_db),

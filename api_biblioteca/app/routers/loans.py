@@ -2,11 +2,12 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime, timedelta
+from sqlalchemy.orm import selectinload
 
 from app.models.loan import Emprestimo as EmprestimoModel
 from app.models.user import Usuario as UsuarioModel
 from app.models.book import Livro as LivroModel
-from app.schemas.loan import EmprestimoCreate, EmprestimoOut, EmprestimoUpdate
+from app.schemas.loan import EmprestimoCreate, EmprestimoOut, EmprestimoUpdate, EmprestimoLivroOut
 from app.database import get_db
 from app.services.security import get_current_user
 
@@ -54,24 +55,46 @@ async def criar_emprestimo(emprestimo: EmprestimoCreate, current_user: UsuarioMo
 from sqlalchemy.future import select
 
 # Listar todos os empréstimos de um determinado usuário (permitido apenas a usuários com o namespace "loan.read_by_client")
-@router.get("/", response_model=list[EmprestimoOut])
+@router.get("/", response_model=list[EmprestimoLivroOut])
 async def listar_emprestimos(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    # Verificar se o usuário tem a permissão necessária
     if "loan.read_by_client" not in current_user.get("permissoes", []):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Permissão negada."
         )
 
-    # Consultar os empréstimos do usuário autenticado
-    query = select(EmprestimoModel).where(EmprestimoModel.usuario_id == current_user["id"])
+    query = (
+        select(EmprestimoModel)
+        .options(selectinload(EmprestimoModel.livro))  # carrega a relação com Livro
+        .where(EmprestimoModel.usuario_id == current_user["id"])
+    )
+    result = await db.execute(query)
+    emprestimos = result.scalars().all()
+    return emprestimos
+
+# Rota para ler todos os emprestimos
+@router.get("/all", response_model=list[EmprestimoOut])
+async def listar_todos_emprestimos(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    # Verifica se o usuário possui a permissão para listar todos os empréstimos
+    if "admin.read" not in current_user.get("permissoes", []):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permissão negada."
+        )
+
+    # Consulta todos os empréstimos, sem filtrar pelo usuário
+    query = select(EmprestimoModel)
     result = await db.execute(query)
     emprestimos = result.scalars().all()
 
     return emprestimos
+
 
 # Obter emprestimo por ID (permitido apenas a usuários com o namespace "admin.read")
 @router.get("/{emprestimo_id}", response_model=EmprestimoOut)

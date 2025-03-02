@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import List
 from datetime import datetime
 from typing import Optional
 
@@ -89,3 +90,7 @@ class LivroOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class LivroListResponse(BaseModel):
+    livros: List[LivroOut]
+    total: int

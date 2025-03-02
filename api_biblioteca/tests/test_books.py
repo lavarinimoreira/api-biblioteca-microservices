@@ -71,21 +71,29 @@ async def test_listar_livros_com_filtro(client: AsyncClient, admin_auth_headers)
 
     # Teste de busca por título
     response = await client.get("/livros/?titulo=Senhor")
+    data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]["titulo"] == "O Senhor dos Anéis"
+    assert data["total"] == 1
+    assert len(data["livros"]) == 1
+    assert data["livros"][0]["titulo"] == "O Senhor dos Anéis"
 
     # Teste de busca por autor
     response = await client.get("/livros/?autor=Tolkien")
+    data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]["autor"] == "J.R.R. Tolkien"
+    assert data["total"] == 1
+    assert len(data["livros"]) == 1
+    assert data["livros"][0]["autor"] == "J.R.R. Tolkien"
 
     # Teste de busca por gênero
     response = await client.get("/livros/?genero=Fantasia")
+    data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()) == 1
-    assert response.json()[0]["autor"] == "J.R.R. Tolkien"
+    assert data["total"] == 1
+    assert len(data["livros"]) == 1
+    # Aqui é possível verificar tanto o gênero quanto outras informações, por exemplo:
+    assert data["livros"][0]["genero"] == "Fantasia"
+
 
 # Obter livro inexistente (deve retornar 404)
 @pytest.mark.asyncio

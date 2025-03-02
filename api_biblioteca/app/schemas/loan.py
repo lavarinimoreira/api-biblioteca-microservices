@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from app.schemas.book import LivroOut
 
 class EmprestimoBase(BaseModel):
     usuario_id: int
@@ -22,3 +23,7 @@ class EmprestimoOut(EmprestimoBase):
 
     class Config:
         from_attributes = True
+
+class EmprestimoLivroOut(EmprestimoOut):
+    livro: LivroOut  # campo aninhado para o livro
+    

@@ -95,8 +95,12 @@ async def update_user(
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não tem permissão para editar usuários.")
 
+    # Atualiza os campos, aplicando hash à senha se fornecida
     for field, value in update_data.model_dump(exclude_unset=True).items():
-        setattr(usuario, field, value)
+        if field == "senha_hash" and value:  # Verifica se o campo é a senha e se não está vazio
+            setattr(usuario, field, bcrypt_context.hash(value))  # Aplica o hash à senha
+        else:
+            setattr(usuario, field, value)
 
     await db.commit()
     await db.refresh(usuario)

@@ -1,9 +1,23 @@
 from fastapi import FastAPI
 from app.routers import books, permissions, users, loans, policy_group, policy_group_permissions, auth, files
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",  # URL do front-end
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get('/healthy')
 def health_check():
