@@ -22,8 +22,8 @@ async def test_upload_profile_picture(client, admin_auth_headers, monkeypatch):
     file_content = b"conteudo_imagem_dummy"
     files = {"file": ("dummy.png", file_content, "image/png")}
 
-    # Realiza a requisição para a rota /profile, passando os headers de autenticação
-    response = await client.post("/images/profile", files=files, headers=admin_auth_headers)
+    # Realiza a requisição para a rota /profile/{user_id} (exemplo: 1), passando os headers de autenticação
+    response = await client.post("/images/profile/1", files=files, headers=admin_auth_headers)
     
     # Verifica se a resposta foi bem-sucedida (HTTP 200)
     assert response.status_code == 200
@@ -33,7 +33,7 @@ async def test_upload_profile_picture(client, admin_auth_headers, monkeypatch):
     assert data.get("profile_picture_url") == "http://images_service:8000/files/profile/dummy.png"
 
 
-# Teste adicionar capa de livro
+
 @pytest.mark.asyncio
 async def test_upload_book_cover_image(client, admin_auth_headers, monkeypatch, async_session):
     # Cria um livro dummy na base de testes
@@ -69,16 +69,18 @@ async def test_upload_book_cover_image(client, admin_auth_headers, monkeypatch, 
         return {"id": 1, "permissoes": ["book.create"]}
     monkeypatch.setattr("app.routers.files.get_current_user", fake_get_current_user)
 
-    # Simula o envio do arquivo (conteúdo dummy)
+    # Simula o envio do arquivo (conteúdo dummy) e envia o book_id via form data
     file_content = b"conteudo_imagem_dummy"
     files = {"file": ("dummy.png", file_content, "image/png")}
+    # Envia o book_id no body do formulário
+    data = {"book_id": "1"}
 
-    # Realiza a requisição para a rota /images/book_cover com o book_id na query
-    response = await client.post("/images/book_cover?book_id=1", files=files, headers=admin_auth_headers)
+    # Realiza a requisição para a rota /images/book_cover, agora enviando os dados via form
+    response = await client.post("/images/book_cover", data=data, files=files, headers=admin_auth_headers)
     
     # Verifica se a resposta foi 200 OK
     assert response.status_code == 200
-    data = response.json()
+    response_data = response.json()
 
     # Verifica se a URL da imagem foi atualizada conforme o fake_upload_imagem
-    assert data.get("image_url") == "http://images_service:8000/files/book_cover/dummy.png"
+    assert response_data.get("image_url") == "http://images_service:8000/files/book_cover/dummy.png"

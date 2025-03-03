@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-"""
-Este script realiza a inserção de dados iniciais no banco de dados "biblioteca".
-"""
+"""=============================================------------------
+/api_biblioteca/services/scripts/_populate_db.py
+================================================------------------
+
+Este script realiza a inserção de dados iniciais no banco de dados.
+
+Certifique-se de já ter realizado a migração das tabelas iniciais.
+
+----------------------------------------------------------------"""
 
 import asyncio
 

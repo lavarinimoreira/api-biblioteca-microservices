@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import Usuario as UsuarioModel
-from app.schemas.user import UsuarioCreate, UsuarioOut, UsuarioUpdate, UsuarioCreateAdmin
+from app.schemas.user import UsuarioCreate, UsuarioOut, UsuarioUpdate, UsuarioCreateAdmin, UsuarioAdminUpdate
 from app.database import get_db
 from app.services.security import get_current_user, bcrypt_context
 
@@ -71,11 +71,10 @@ async def create_user(
         await db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O email já está cadastrado.")
 
-# Atualizar usuário (próprio usuário pode editar seus dados, admin pode editar qualquer um)
 @router.put("/{usuario_id}", response_model=UsuarioOut)
 async def update_user(
     usuario_id: int,
-    update_data: UsuarioUpdate,
+    update_data: UsuarioAdminUpdate,  # Agora usamos o schema que aceita grupo_politica
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
@@ -87,24 +86,37 @@ async def update_user(
 
     # Administradores podem editar qualquer usuário
     if "admin.update" in current_user.get("permissoes", []):
+        # Permite editar todos os campos, inclusive grupo_politica
         pass
     # Clientes podem editar apenas seus próprios dados
     elif "client.update_self" in current_user.get("permissoes", []):
         if usuario.id != current_user["id"]:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não tem permissão para editar este usuário.")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não tem permissão para editar este usuário."
+            )
     else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não tem permissão para editar usuários.")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não tem permissão para editar usuários."
+        )
 
-    # Atualiza os campos, aplicando hash à senha se fornecida
+    # Atualiza os campos; se a senha for fornecida, aplica o hash; 
+    # e para grupo_politica, só atualiza se o usuário tiver permissão de admin.
     for field, value in update_data.model_dump(exclude_unset=True).items():
-        if field == "senha_hash" and value:  # Verifica se o campo é a senha e se não está vazio
-            setattr(usuario, field, bcrypt_context.hash(value))  # Aplica o hash à senha
+        if field == "senha_hash" and value:
+            setattr(usuario, field, bcrypt_context.hash(value))
+        elif field == "grupo_politica":
+            if "admin.update" in current_user.get("permissoes", []):
+                setattr(usuario, field, value)
+            # Caso o usuário não seja admin, ignoramos o campo ou podemos levantar um erro
         else:
             setattr(usuario, field, value)
 
     await db.commit()
     await db.refresh(usuario)
     return usuario
+
 
 # Excluir usuário (apenas usuários com "admin.delete" podem excluir usuários)
 @router.delete("/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
