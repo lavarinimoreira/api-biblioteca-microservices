@@ -20,14 +20,14 @@ Na raiz do projeto, você encontrará os seguintes arquivos de ambiente:
 - **.env** (para ambiente de desenvolvimento):
 
 ```env
-DATABASE_URL=postgresql+asyncpg://dev_gabriel:university@biblioteca_db:5432/biblioteca_db
-DATABASE_URL_CELERY=postgresql+psycopg2://dev_gabriel:university@biblioteca_db:5432/biblioteca_db
+DATABASE_URL=postgresql+asyncpg://admin:university@biblioteca_db:5432/biblioteca_db
+DATABASE_URL_CELERY=postgresql+psycopg2://admin:university@biblioteca_db:5432/biblioteca_db
 
-POSTGRES_USER=dev_gabriel
+POSTGRES_USER=admin
 POSTGRES_PASSWORD=university
 POSTGRES_DB=biblioteca_db
 
-PGADMIN_DEFAULT_EMAIL=lavarinimoreira@gmail.com
+PGADMIN_DEFAULT_EMAIL=admin@biblioteca.com
 PGADMIN_DEFAULT_PASSWORD=university
 
 API_KEY=t8v5W4ntL98tuv4Sn90vnAk
@@ -39,16 +39,16 @@ ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ```
 
 - **.env.test** (para ambiente de testes):
-```
-DATABASE_URL=postgresql+asyncpg://dev_gabriel:university@biblioteca_db_test:5432/biblioteca_db_test
+```env
+DATABASE_URL=postgresql+asyncpg://admin:university@biblioteca_db_test:5432/biblioteca_db_test
 
-POSTGRES_USER=dev_gabriel
+POSTGRES_USER=admin
 POSTGRES_PASSWORD=university
 
 POSTGRES_DB=biblioteca_db_test
 ```
 No diretório `/images_service` há também um arquivo **.env** específico para esse serviço:
-```
+```env
 API_KEY=t8v5W4ntL98tuv4Sn90vnAk
 ```
 ### 1.3. Rodando o Projeto Localmente
@@ -92,7 +92,11 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias e ferramentas:
 - **Poetry:** Gerenciamento de dependências e empacotamento.
 - **Celery:** Processamento de tarefas em segundo
 
-### 2.2 Estruturação do Código
+### 2.1. Arquitetura e Diagrama ER
+O diagrama abaixo ilustra a estrutura do banco de dados do sistema de biblioteca:
+![Diagrama ER](images/er_diagram.png)
+
+### 2.3 Estruturação do Código
 O código foi organizado para manter uma separação clara das funcionalidades, dividindo o projeto em dois microsserviços:
 - **api_biblioteca:** Contém a lógica principal da API, rotas, controladores e serviços.
 - **images_services:**  Responsável pelo gerenciamento das imagens dos usuários e capas dos livros.
@@ -104,18 +108,20 @@ Esta organização visa facilitar a manutenção, escalabilidade e a evolução 
 ## 3. Dificuldades e Dúvidas
 ### 3.1 Principais Desafios Encontrados
 - **Configuração do Alembic:**
-Ao separar as tabelas em diretórios diferentes, ocorreram problemas de migração devido ao não reconhecimento das tabelas.
+Ao separar as tabelas em diretórios diferentes, ocorreram problemas de migração devido ao não reconhecimento das tabelas.\
 **Solução:** Criar um arquivo \__all_models.py para que o Alembic detecte corretamente quaisquer atualizações no modelo.
 
 - **Configuração do Celery:**
-Utilizava um driver assíncrono para o banco de dados, porém o Celery é nativamente síncrono, o que causou conflitos na configuração.
+Utilizava um driver assíncrono para o banco de dados, porém o Celery é nativamente síncrono, o que causou conflitos na configuração.\
 **Solução:** Desenvolver um driver síncrono para o Celery, visto que as operações não exigem assincronia nesse contexto.
 
 - **Refatoração para Microsserviços:**
-A divisão entre a API principal e a API de imagens exigiu um planejamento detalhado para garantir que as requisições fossem encaminhadas corretamente entre os serviços.
+A divisão entre a API principal e a API de imagens exigiu um planejamento detalhado para garantir que as requisições fossem encaminhadas corretamente entre os serviços.\
 **Solução:** Realizar *debugging* e inspeção cuidadosa das requisições, garantindo que cada serviço comunique corretamente as suas responsabilidades.
 
 ---
-## Considerações Finais
+## Contato
 
-Este projeto foi desenvolvido visando a modularidade e escalabilidade, adotando práticas modernas de desenvolvimento com FastAPI e utilizando ferramentas que facilitam a manutenção e evolução da aplicação. Feedback e contribuições são bem-vindos!
+Para dúvidas, sugestões ou contribuições, sinta-se à vontade para entrar em contato:
+<a href = "mailto:lavarinimoreira@gmail.com">lavarinimoreira@gmail.com</a>
+    
