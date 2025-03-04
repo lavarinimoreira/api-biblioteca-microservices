@@ -30,7 +30,7 @@ class UsuarioCreate(UsuarioBase):
 
 # Schema específico para criação de Admins
 class UsuarioCreateAdmin(UsuarioCreate):
-    grupo_politica: Literal["admin", "cliente"] = Field(..., description="Grupo de política do usuário.")
+    grupo_politica: str = Field(..., description="Grupo de política do usuário.")
 
     model_config = {
         "json_schema_extra": {
@@ -41,7 +41,7 @@ class UsuarioCreateAdmin(UsuarioCreate):
                     "telefone": "(31)99999-9999",
                     "endereco_completo": "Rua Piracicaba, número 567, Bairro Floresta.",
                     "senha_hash": "SenhaAdmin123!",
-                    "grupo_politica": "admin"
+                    "grupo_politica": "admin"  # Exemplo, mas poderá ser outro valor
                 }
             ]
         }
@@ -56,7 +56,7 @@ class UsuarioUpdate(BaseModel):
     senha_hash: Optional[str] = Field(None, min_length=8, max_length=128)
 
 class UsuarioAdminUpdate(UsuarioUpdate):
-    grupo_politica: Optional[Literal["admin", "cliente"]] = None
+    grupo_politica: Optional[str] = None
 
 # Schema para resposta (exclui a senha por segurança)
 class UsuarioOut(UsuarioBase):

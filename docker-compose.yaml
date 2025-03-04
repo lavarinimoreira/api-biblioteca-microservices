@@ -87,8 +87,8 @@ services:
       - "5432:5432"
     env_file:
       - .env
-    environment:
-      - POSTGRES_DB=biblioteca_db
+    # environment:
+      # - POSTGRES_DB=biblioteca_db
     volumes:
       - biblioteca_db_data:/var/lib/postgresql/data
 
@@ -101,10 +101,10 @@ services:
     ports:
       - "5433:5432"
     env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://dev_gabriel:university@biblioteca_db_test:5432/biblioteca_db_test
-      - POSTGRES_DB=biblioteca_db_test
+      - .env.test
+    # environment:
+      # - DATABASE_URL=postgresql+asyncpg://dev_gabriel:university@biblioteca_db_test:5432/biblioteca_db_test
+      # - POSTGRES_DB=biblioteca_db_test
     volumes:
       - biblioteca_db_test_data:/var/lib/postgresql/data
 

@@ -20,11 +20,15 @@ celery_app = Celery(
 celery_app.conf.beat_schedule = {
     'verificar-emprestimos-diario': {
         'task': 'app.services.celery.celery_app.verificar_emprestimos_vencidos',
-        'schedule': timedelta(days=1),
+        # 'schedule': timedelta(days=1),
+        'schedule': timedelta(hours=12)
+        # 'schedule': timedelta(seconds=30)
     },
     'limpar-imagens-orfas': {
         'task': 'app.services.celery.celery_app.limpar_imagens_orfas',
-        'schedule': timedelta(days=1),
+        # 'schedule': timedelta(days=1),
+        'schedule': timedelta(hours=12)
+        # 'schedule': timedelta(seconds=30)
     },
 }
 
