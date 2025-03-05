@@ -8,12 +8,21 @@ Este projeto implementa uma API para gerenciamento de uma biblioteca, composta p
 
 ## 1. Instruções de Uso do Projeto
 
-### 1.1. Instalação de Dependências
+- Clone o repositório:
+```bash
+git clone https://github.com/lavarinimoreira/api-biblioteca-microservices.git
+```
+- Navegue até a o diretório do projeto:
+```bash
+cd api-biblioteca-microservices
+```
+
+### 1.3. Instalação de Dependências
 
 O projeto utiliza **Docker Compose** para orquestrar os serviços e **Poetry** para gerenciar as dependências.  
 Portanto, ao subir os containers com Docker Compose, as dependências serão instaladas automaticamente.
 
-### 1.2. Configuração do Ambiente
+### 1.4. Configuração do Ambiente
 
 Na raiz do projeto, você precisará criar os seguintes arquivos de ambiente podendo seguir o seguinte exemplo:
 
@@ -27,7 +36,6 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=university
 
 DATABASE_URL_CELERY=postgresql+psycopg2://postgres:university@biblioteca_db:5432/biblioteca_db
-
 
 TEST_DATABASE_URL=postgresql+asyncpg://postgres:university@biblioteca_db_test:5432/biblioteca_db_test
 TEST_POSTGRES_DB=biblioteca_db_test
@@ -52,11 +60,11 @@ POSTGRES_PASSWORD=university
 
 POSTGRES_DB=biblioteca_db_test
 ```
-No diretório `/images_service` há também um arquivo **.env** específico para esse serviço:
+No diretório `/images_service` crie também um arquivo **.env** específico para esse serviço:
 ```env
 API_KEY=t8v5W4ntL98tuv4Sn90vnAk
 ```
-### 1.3. Rodando o Projeto Localmente
+### 1.5. Rodando o Projeto Localmente
 
 Após configurar os arquivos de ambiente, execute as seguintes etapas:
 
@@ -81,7 +89,7 @@ python -m app.services.scripts._populate_db
 ```
 Após essa etapa o banco de dados estará setado com um usuário administrador.\
 Você pode sair do container com o comando "Ctrl" + "D".
-### 1.4. Rodando os Testes
+### 1.6. Rodando os Testes
 Para executar os testes, utilize o seguinte comando:
 ```bash
 docker compose exec api_biblioteca pytest
@@ -117,7 +125,7 @@ Esta organização visa facilitar a manutenção, escalabilidade e a evolução 
 ## 3. Dificuldades e Dúvidas
 ### 3.1 Principais Desafios Encontrados
 - **Configuração do Alembic:**
-Ao separar as tabelas em diretórios diferentes, ocorreram problemas de migração devido ao não reconhecimento das tabelas.\
+Ao separar as tabelas em arquivos diferentes, ocorreram problemas de migração devido ao não reconhecimento das tabelas.\
 **Solução:** Criar um arquivo \__all_models.py para que o Alembic detecte corretamente quaisquer atualizações no modelo.
 
 - **Configuração do Celery:**
