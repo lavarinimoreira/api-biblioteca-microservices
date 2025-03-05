@@ -1,6 +1,6 @@
 # Projeto FastAPI - Biblioteca
 
-Este projeto implementa uma API para gerenciamento de uma biblioteca, composta por dois microsserviços:  
+Este projeto implementa uma API RESTful para gerenciamento de uma biblioteca, composta por dois microsserviços:  
 - **api_biblioteca:** API principal para gerenciar as operações do sistema.  
 - **images_services:** Responsável pelo gerenciamento de imagens de usuários e capas de livros.
 
@@ -8,11 +8,11 @@ Este projeto implementa uma API para gerenciamento de uma biblioteca, composta p
 
 ## 1. Instruções de Uso do Projeto
 
-- Clone o repositório:
+### 1.1. Clone o repositório:
 ```bash
 git clone https://github.com/lavarinimoreira/api-biblioteca-microservices.git
 ```
-- Navegue até a o diretório do projeto:
+### 1.2. Navegue até a o diretório do projeto:
 ```bash
 cd api-biblioteca-microservices
 ```
@@ -107,7 +107,7 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias e ferramentas:
 - **JWT:** Implementação de autenticação segura.
 - **Docker e Docker Compose:** Containerização e orquestração dos serviços.
 - **Poetry:** Gerenciamento de dependências e empacotamento.
-- **Celery:** Processamento de tarefas em segundo
+- **Celery:** Processamento de tarefas em segundo plano.
 
 ### 2.1. Arquitetura e Diagrama ER
 O diagrama abaixo ilustra a estrutura do banco de dados do sistema de biblioteca:
