@@ -12,7 +12,7 @@ Este projeto implementa uma API para gerenciamento de uma biblioteca, composta p
 ```bash
 git clone https://github.com/lavarinimoreira/api-biblioteca-microservices.git
 ```
-- Navegue até a o diretório do projeto:
+- Navegue até o diretório do projeto:
 ```bash
 cd api-biblioteca-microservices
 ```
@@ -110,7 +110,7 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias e ferramentas:
 - **Poetry:** Gerenciamento de dependências e empacotamento.
 - **Celery:** Processamento de tarefas em segundo plano.
 
-### 2.1. Arquitetura e Diagrama ER
+### 2.2. Arquitetura e Diagrama ER
 O diagrama abaixo ilustra a estrutura do banco de dados do sistema de biblioteca:
 ![Diagrama ER](images/er_diagram.png)
 A tabela grupo_politica possui a coluna "nome" como chave candidata que é utilizada como chave estrangeira na tabela associativa grupo_politica_permissao.
