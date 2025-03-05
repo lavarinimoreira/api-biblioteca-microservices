@@ -1,6 +1,6 @@
 # Projeto FastAPI - Biblioteca
 
-Este projeto implementa uma API RESTful para gerenciamento de uma biblioteca, composta por dois microsserviços:  
+Este projeto implementa uma API para gerenciamento de uma biblioteca, composta por dois microsserviços:  
 - **api_biblioteca:** API principal para gerenciar as operações do sistema.  
 - **images_services:** Responsável pelo gerenciamento de imagens de usuários e capas de livros.
 
@@ -8,21 +8,21 @@ Este projeto implementa uma API RESTful para gerenciamento de uma biblioteca, co
 
 ## 1. Instruções de Uso do Projeto
 
-### 1.1. Clone o repositório:
+- Clone o repositório:
 ```bash
 git clone https://github.com/lavarinimoreira/api-biblioteca-microservices.git
 ```
-### 1.2. Navegue até a o diretório do projeto:
+- Navegue até a o diretório do projeto:
 ```bash
 cd api-biblioteca-microservices
 ```
 
-### 1.3. Instalação de Dependências
+### 1.1. Instalação de Dependências
 
 O projeto utiliza **Docker Compose** para orquestrar os serviços e **Poetry** para gerenciar as dependências.  
 Portanto, ao subir os containers com Docker Compose, as dependências serão instaladas automaticamente.
 
-### 1.4. Configuração do Ambiente
+### 1.2. Configuração do Ambiente
 
 Na raiz do projeto, você precisará criar os seguintes arquivos de ambiente podendo seguir o seguinte exemplo:
 
@@ -64,7 +64,7 @@ No diretório `/images_service` crie também um arquivo **.env** específico par
 ```env
 API_KEY=t8v5W4ntL98tuv4Sn90vnAk
 ```
-### 1.5. Rodando o Projeto Localmente
+### 1.3. Rodando o Projeto Localmente
 
 Após configurar os arquivos de ambiente, execute as seguintes etapas:
 
@@ -89,6 +89,7 @@ python -m app.services.scripts._populate_db
 ```
 Após essa etapa o banco de dados estará setado com um usuário administrador.\
 Você pode sair do container com o comando "Ctrl" + "D".
+- A documentação agora pode ser acessada em: **http://localhost:8000/docs**
 ### 1.6. Rodando os Testes
 Para executar os testes, utilize o seguinte comando:
 ```bash
@@ -112,6 +113,7 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias e ferramentas:
 ### 2.1. Arquitetura e Diagrama ER
 O diagrama abaixo ilustra a estrutura do banco de dados do sistema de biblioteca:
 ![Diagrama ER](images/er_diagram.png)
+A tabela grupo_politica possui a coluna "nome" como chave candidata que é utilizada como chave estrangeira na tabela associativa grupo_politica_permissao.
 
 ### 2.3 Estruturação do Código
 O código foi organizado para manter uma separação clara das funcionalidades, dividindo o projeto em dois microsserviços:
@@ -130,7 +132,11 @@ Ao separar as tabelas em arquivos diferentes, ocorreram problemas de migração 
 
 - **Configuração do Celery:**
 Utilizava um driver assíncrono para o banco de dados, porém o Celery é nativamente síncrono, o que causou conflitos na configuração.\
-**Solução:** Desenvolver um driver síncrono para o Celery, visto que as operações não exigem assincronia nesse contexto.
+**Solução:** Desenvolver um driver síncrono para o Celery, visto que as operações não exigem assincronia nesse contexto. Duas tarefas são executadas em segundo plano, ambas, de 12 em 12 horas: a primeira é responsável por verificar as datas dos empréstimos e identificar atrasos, alterando o status do empréstimo e acionando a função para notificar o usuário. A segunda tarefa lida com arquivos órfão, removendo imagens que não estão mais relacionadas a nenhum usuário ou livro.
+
+- **Dependências Circulares:**
+Durante o desenvolvimento, percebi o problema de dependências circulares entre as tabelas que referenciavam umas às outra através de chaves estrangeiras, o que dificultava a criação dos registros de forma sequencial durante as migrações e a inicialização do sistema.\
+**Solução:** Utilizar a função "relationship" do sqlalchemy para realizar corretamente o mapeamento das relações dependentes e implementar scripts específicos para popular o banco de dados diretamente. Esses scripts realizam a inserção dos dados fundamentais de forma ordenada, quebrando o ciclo de dependência.
 
 - **Refatoração para Microsserviços:**
 A divisão entre a API principal e a API de imagens exigiu um planejamento detalhado para garantir que as requisições fossem encaminhadas corretamente entre os serviços.\
