@@ -132,7 +132,7 @@ Ao separar as tabelas em arquivos diferentes, ocorreram problemas de migração 
 
 - **Configuração do Celery:**
 Utilizava um driver assíncrono para o banco de dados, porém o Celery é nativamente síncrono, o que causou conflitos na configuração.\
-**Solução:** Desenvolver um driver síncrono para o Celery, visto que as operações não exigem assincronia nesse contexto. Duas tarefas são executadas em segundo plano, ambas, de 12 em 12 horas: a primeira é responsável por verificar as datas dos empréstimos e identificar atrasos, alterando o status do empréstimo e acionando a função para notificar o usuário. A segunda tarefa lida com arquivos órfão, removendo imagens que não estão mais relacionadas a nenhum usuário ou livro.
+**Solução:** Desenvolver um driver síncrono para o Celery, visto que as operações não exigem assincronia nesse contexto. Duas tarefas são executadas em segundo plano, ambas, de 12 em 12 horas: a primeira é responsável por verificar as datas dos empréstimos e identificar atrasos, alterando o status do empréstimo e acionando a função para notificar o usuário. A segunda tarefa lida com arquivos órfãos, removendo imagens que não estão mais relacionadas a nenhum usuário ou livro.
 
 - **Dependências Circulares:**
 Durante o desenvolvimento, percebi o problema de dependências circulares entre as tabelas que referenciavam umas às outra através de chaves estrangeiras, o que dificultava a criação dos registros de forma sequencial durante as migrações e a inicialização do sistema.\
