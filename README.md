@@ -63,7 +63,7 @@ Após configurar os arquivos de ambiente, execute as seguintes etapas:
 1. **Subir os serviços com Docker Compose:**  
  Utilize o comando para iniciar os containers.
  ```bash
- docker compose up -d
+ docker compose up --build -d
   ```
 2. **Realizar a migração com o Alembic:**
 Execute o comando abaixo para atualizar o banco de dados:
