@@ -15,19 +15,24 @@ Portanto, ao subir os containers com Docker Compose, as dependências serão ins
 
 ### 1.2. Configuração do Ambiente
 
-Na raiz do projeto, você encontrará os seguintes arquivos de ambiente:
+Na raiz do projeto, você precisará criar os seguintes arquivos de ambiente podendo seguir o seguinte exemplo:
 
 - **.env** (para ambiente de desenvolvimento):
 
 ```env
-DATABASE_URL=postgresql+asyncpg://admin:university@biblioteca_db:5432/biblioteca_db
-DATABASE_URL_CELERY=postgresql+psycopg2://admin:university@biblioteca_db:5432/biblioteca_db
-
-POSTGRES_USER=admin
-POSTGRES_PASSWORD=university
+DATABASE_URL=postgresql+asyncpg://postgres:university@biblioteca_db:5432/biblioteca_db
 POSTGRES_DB=biblioteca_db
 
-PGADMIN_DEFAULT_EMAIL=admin@biblioteca.com
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=university
+
+DATABASE_URL_CELERY=postgresql+psycopg2://postgres:university@biblioteca_db:5432/biblioteca_db
+
+
+TEST_DATABASE_URL=postgresql+asyncpg://postgres:university@biblioteca_db_test:5432/biblioteca_db_test
+TEST_POSTGRES_DB=biblioteca_db_test
+
+PGADMIN_DEFAULT_EMAIL=postgres@biblioteca.com
 PGADMIN_DEFAULT_PASSWORD=university
 
 API_KEY=t8v5W4ntL98tuv4Sn90vnAk
@@ -40,9 +45,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES=10080
 
 - **.env.test** (para ambiente de testes):
 ```env
-DATABASE_URL=postgresql+asyncpg://admin:university@biblioteca_db_test:5432/biblioteca_db_test
+DATABASE_URL=postgresql+asyncpg://postgres:university@biblioteca_db_test:5432/biblioteca_db_test
 
-POSTGRES_USER=admin
+POSTGRES_USER=postgres
 POSTGRES_PASSWORD=university
 
 POSTGRES_DB=biblioteca_db_test
@@ -66,12 +71,16 @@ Execute o comando abaixo para atualizar o banco de dados:
 docker compose exec api_biblioteca alembic upgrade head
 ```
 3. **Popular o banco de dados:**
-Após a migração, entre no container da API e execute o script de popular o banco:
+Após a migração, entre no container da API:
 ```bash
 docker compose exec api_biblioteca bash
+```
+E execute o script de popular o banco:
+```bash
 python -m app.services.scripts._populate_db
 ```
-Após essa etapa, o banco de dados estará setado com um usuário administrador.
+Após essa etapa o banco de dados estará setado com um usuário administrador.\
+Você pode sair do container com o comando "Ctrl" + "D".
 ### 1.4. Rodando os Testes
 Para executar os testes, utilize o seguinte comando:
 ```bash
